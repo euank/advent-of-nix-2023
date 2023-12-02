@@ -1,9 +1,13 @@
 {
   description = "Advent of code, 2023, solved with nix";
-  outputs = { self, nixpkgs }: {
-    day01 = import ./day01/default.nix { inherit nixpkgs; };
-    day02 = import ./day02/default.nix { inherit nixpkgs; };
+  outputs = { self, nixpkgs }:
 
-    formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
-  };
+    let
+      dayDirs =
+        nixpkgs.lib.filterAttrs (name: _: nixpkgs.lib.hasPrefix "day" name)
+        (builtins.readDir ./.);
+    in {
+      formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
+    } // (nixpkgs.lib.mapAttrs (name: _: import ./${name} { inherit nixpkgs; })
+      dayDirs);
 }
