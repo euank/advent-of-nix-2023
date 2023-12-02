@@ -13,6 +13,6 @@ For some days, you may have to run `nix eval '.#dayX.part1'` and `.part2` separa
 
 nix has awful computational performance. Really bad. Expect solutions to generally take a large amount of memory and time to complete.
 
-I will note any days below which take over 8GiB of memory and over 5 minutes on my machine.
+I will note any days below which take over 8GiB of memory and/or over 5 minutes on my machine.
 
 ### Specific day's notes
