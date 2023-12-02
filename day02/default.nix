@@ -40,4 +40,17 @@ let
         lists.filter (game: lists.all isPossible game.segments) games;
     in foldl' builtins.add 0 (map (g: g.num) possibleGames);
 
-in { part1 = part1Answer (map parseGame lines); }
+  # part2
+  part2Answer = games:
+    foldl' (acc: game:
+      let
+        minColor = color:
+          foldl' trivial.max 0
+          (map (s: if s ? "${color}" then s.${color} else 0) game.segments);
+        n = (minColor "red") * (minColor "green") * (minColor "blue");
+      in acc + n) 0 games;
+
+in {
+  part1 = part1Answer (map parseGame lines);
+  part2 = part2Answer (map parseGame lines);
+}
