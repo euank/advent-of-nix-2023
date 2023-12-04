@@ -49,7 +49,6 @@ let
         let
           count = head counts;
           lw = lineWinning line;
-          nw = lw * count;
           incCounts = n: cs:
             if n == 0 then
               cs
@@ -62,7 +61,7 @@ let
           (score + count)
         else
           doIt (score + count) (head lines) (tail lines) counts';
-    in doIt 0 (head parsed) (tail parsed) (genList (x: 1) ((length lines) + 1));
+    in doIt 0 (head parsed) (tail parsed) (genList (x: 1) (length lines));
 in {
   part1 = part1Answer lines;
   part2 = part2Answer lines;
