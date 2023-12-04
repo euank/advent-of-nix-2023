@@ -1,5 +1,7 @@
 ## Advent of Nix 2023
 
+The much-awaited sequal to [Advent of Nix 2021](https://github.com/euank/advent-of-nix-2021).
+
 This is my go at Advent of Code (2023) in pure nix. Hiding bash or other languages in the nix isn't allowed.
 
 ### Running solutions
