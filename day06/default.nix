@@ -20,22 +20,23 @@ let
       isWinning = time: maxTime: target: (maxTime - time) * time > target;
       waysToWinRace = race:
         let
-          searchWin = times:
-            if length times == 0 then
-              null
+          searchWin = minTime: maxTime: fst:
+            if minTime == maxTime then
+              if isWinning minTime race.time race.dist then minTime else null
             else
               let
-                pivot = elemAt times ((length times) / 2);
-                left = searchWin (sublist 0 ((length times) / 2) times);
-                right = searchWin
-                  (sublist (((length times) / 2) + 1) (length times) times);
+                pivot = (minTime + maxTime) / 2;
+                left' = searchWin minTime pivot fst;
+                right' = searchWin (pivot + 1) maxTime fst;
+                left = if fst then left' else right';
+                right = if fst then right' else left';
               in if isWinning pivot race.time race.dist then
                 if left != null then left else pivot
               else
                 right;
 
-          firstWin = searchWin (genList trivial.id race.time);
-          lastWin = searchWin (reverseList (genList trivial.id race.time));
+          firstWin = searchWin 0 race.time true;
+          lastWin = searchWin 0 race.time false;
         in (lastWin - firstWin + 1);
     in foldl' (acc: race: acc * (waysToWinRace race)) 1 races;
 

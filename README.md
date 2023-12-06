@@ -18,7 +18,3 @@ nix has awful computational performance. Really bad. Expect solutions to general
 I will note any days below which take over 8GiB of memory and/or over 5 minutes on my machine.
 
 ### Specific day's notes
-
-#### Day 06
-
-This one takes 15GiB of memory on my machine, but completes pretty quickly (15s or so).
