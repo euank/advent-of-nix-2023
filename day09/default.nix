@@ -15,17 +15,16 @@ let
       diffs = line: zipListsWith (l: r: r - l) line (tail line);
 
       lineAnswer = line:
-        if (length line) < 3 then
-          throw "Too short line"
+        if length (unique line) == 1 then
+          last line
         else
-          let
-            l1 = last line;
-            l2 = last (init line);
-            l3 = last (init (init line));
-          in if l1 == l2 && l2 == l3 then
-            l1
-          else
-            l1 + (lineAnswer (diffs line));
+          (last line) + (lineAnswer (diffs line));
     in foldl' builtins.add 0 (map lineAnswer input);
 
-in { part1 = part1Answer (parseInput input); }
+  # part2
+  part2Answer = input: part1Answer (map reverseList input);
+
+in {
+  part1 = part1Answer (parseInput input);
+  part2 = part2Answer (parseInput input);
+}
