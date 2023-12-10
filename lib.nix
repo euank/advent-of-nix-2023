@@ -41,5 +41,6 @@ let
 
     gcd = lhs: rhs: if lhs == 0 then rhs else gcd (trivial.mod rhs lhs) lhs;
     lcm = lhs: rhs: (lhs * rhs) / (gcd lhs rhs);
+    abs = num: if num < 0 then (-1) * num else num;
   };
 in lib
