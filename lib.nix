@@ -39,5 +39,7 @@ let
         else
           binarySearch rhs cmp;
 
+    gcd = lhs: rhs: if lhs == 0 then rhs else gcd (trivial.mod rhs lhs) lhs;
+    lcm = lhs: rhs: (lhs * rhs) / (gcd lhs rhs);
   };
 in lib

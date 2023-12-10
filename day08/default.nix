@@ -22,6 +22,10 @@ let
         foldl' (acc: el: acc // el) { } (map parseStep (tail (tail lines)));
     };
 
+  stepNode = i: input: node:
+    let instr = elemAt (input.instrs) (trivial.mod i (length input.instrs));
+    in input.nodes."${node}"."${instr}";
+
   part1Answer = numSteps: input: state:
     if state.node == "ZZZ" then
       numSteps
@@ -35,45 +39,71 @@ let
         in if instr == "L" then n.L else n.R;
       };
 
-
+  # part 2
 
   # We need to be at least a little more clever for part2.
-  # if we find where each node "loops" and then look for all the 'Z's there, we
-  # can probably do this mathematically (the first number that all the z
-  # indexes are factors of, right?)...
-  # First, find each node that loops
-  # Do it just for idx 0, effectively we're memoizing one idx, but that should be enough I hope
-  nodeInfo = input: startNode: otherLoops:
-  let
-    # go this many steps, if we haven't gotten back to the start, we got stuck
-    # in a loop elsewhere.
-    maxSteps = (length input.instrs) * (length (attrNames input.nodes));
-    step = idx: curNode: goals':
+  # Clearly, things loop because the instruction length is small, and it takes
+  # forever, so each one is on a different length loop after a certain amount
+  # of time.
+  # So, for each start node, find where the first loop is, find where in the
+  # loop Zs are, and then put them together into a system of equations
+  #
+  # In practice, I ran this with debug output, and for my input got the following:
+  #  { "loopLength": 11911,
+  #    "loopsAt": 8,
+  #    "zs": [ 11911 ] },
+  #  { "loopLength": 14681,
+  #    "loopsAt": 4,
+  #    "zs": [ 14681 ] },
+  #  { "loopLength": 19667,
+  #    "loopsAt": 2,
+  #    "zs": [ 19667 ] },
+  #  { "loopLength": 16897,
+  #    "loopsAt": 3, "zs": [ 16897 ] },
+  #  { "loopLength": 13019,
+  #    "loopsAt": 2, "zs": [ 13019 ] },
+  #  { "loopLength": 21883,
+  #    "loopsAt": 2,
+  #    "zs": [ 21883 ] }
+  #
+  # From this, we can observe everything always loops at a Z node, after taking 2, 3, 4, or 8 steps.
+  # Since we loop at a "Z" node, that means the LCM of the loop lengths will be
+  # when they're all at the start, and thus all at Z nodes...
+  # We don't even need to add in the "loopsAt" offset, like I originally
+  # thought, because they all get into a loop within the first set of
+  # instructions, and "join" the loop at the right time, so we really can just LCM.
+  # Anyway, that works for my input, and I assume it will for all of em, so
+  # based on reading the above debug output, LCM time.
+
+  findZs = i: input: node: loopsAt: loopLength:
+    if i == (loopsAt + loopLength) then
+      [ ]
+    else
+      (if (hasSuffix "Z" node) then [ i ] else [ ])
+      ++ findZs (i + 1) input (stepNode i input node) loopsAt loopLength;
+
+  processNode = startNode: numSteps: node: input: hist:
+    let idxMod = trivial.mod numSteps (length input.instrs);
+    in if hist ? "${toString idxMod}.${node}" then
+    # looping
       let
-        idxMod = trivial.mod idx (length input.instrs);
-        instr = elemAt (input.instrs) idxMod;
-        nextNode = input.nodes."${curNode}"."${if instr == "L" then "L" else "R"}";
-        goals = goals' ++ (if (hasSuffix "Z" curNode) then [ idx ] else []);
-      in
-      if otherLoops ? "${nextNode}" && idxMod == 0 then { idx = idx + (otherLoops.${nextNode}.idx); goals = goals ++ (map (o: o + idx) otherLoops.${nextNode}.goals); }
-      else if nextNode == startNode && idxMod == 0 then { inherit idx goals; }
-      else if idx > maxSteps then null
-      else step (idx + 1) nextNode goals;
-in
-  step 0 startNode [];
+        loopsAt = hist."${toString idxMod}.${node}";
+        loopLength = numSteps - loopsAt;
+        zs = findZs 0 input startNode loopsAt loopLength;
+      in { inherit loopsAt loopLength zs; }
+    else
+    # Not looping
+      let hist' = hist // { "${toString idxMod}.${node}" = numSteps; };
+      in processNode startNode (numSteps + 1) (stepNode numSteps input node)
+      input hist';
 
   part2Answer = numSteps: input: state:
-  let
-    loopNodes = foldl' (acc: node: let inf = nodeInfo input node acc; in if inf == null then acc else acc // { "${node}" = inf; }) {} (attrNames input.nodes);
-    # Now we know when any node that does loop loops, and how far to a 'Z' node from the loop
-    # Now run the sim, and be ready for loops
-    idxMod = trivial.mod idx (length input.instrs);
-  in
-  if modIdx == 0 then
-    # Use memo
-    throw "TODO"
-  else
-  throw "TODO";
+    let
+      # I printed this to figure out what to do
+      intermediateOutput =
+        map (node: processNode node 0 node input ({ })) state.nodes;
+      lengths = map (el: el.loopLength) intermediateOutput;
+    in foldl' lcm (head lengths) (tail lengths);
 
   pinput = parseInput input;
 in {
