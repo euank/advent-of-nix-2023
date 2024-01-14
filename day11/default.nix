@@ -28,27 +28,30 @@ let
         ((arr2.map (e: if e.val == "#" then { inherit (e) x y; } else null)
           cgrid)));
 
-      # Shift coordinates to expand space
+    in { inherit coordinates emptyRows emptyCols; };
+
+  expand = factor: data:
+    with data;
+    let
       coordinates' = foldl' (coord: r:
         map (el:
           if el.y > r then {
             x = el.x;
-            y = el.y + 1;
+            y = el.y + factor;
           } else
             el) coord) coordinates (lists.reverseList emptyRows);
       coordinates'' = foldl' (coord: r:
         map (el:
           if el.x > r then {
-            x = el.x + 1;
+            x = el.x + factor;
             y = el.y;
           } else
             el) coord) coordinates' (lists.reverseList emptyCols);
-
     in coordinates'';
 
-  part1Answer = input:
+  answer = input: factor:
     let
-      coords = parseInput input;
+      coords = expand factor (parseInput input);
       pairs = cartesianProductOfSets {
         l = coords;
         r = coords;
@@ -59,4 +62,10 @@ let
         l = pair.l;
         r = pair.r;
       in (abs (l.x - r.x)) + (abs (l.y - r.y))) pairs)) / 2;
-in { x = part1Answer input; }
+
+  part1Answer = input: answer input 1;
+  part2Answer = input: answer input (1000000 - 1);
+in {
+  part1 = part1Answer input;
+  part2 = part2Answer input;
+}
