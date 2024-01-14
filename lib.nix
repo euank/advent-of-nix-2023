@@ -45,6 +45,9 @@ let
 
 
     arr2 = rec {
+      width = arr: if (length arr) == 0 then 0 else length (elemAt arr 0);
+      height = length;
+
       get = arr: x: y: elemAt (elemAt arr y) x;
       set = arr: x: y: val:
       let
@@ -55,6 +58,8 @@ let
         afterX = sublist (x  + 1) ((length elY) - (x + 1)) elY;
       in toY ++ [ (toX ++ [ val ] ++ afterX) ] ++ afterY;
 
+      getRow = arr: i: elemAt arr i;
+      getCol = arr: i: genList (y: get arr i y) (height arr);
 
       map = f: arr: genList (y: genList (x: f (get arr x y)) (length (head arr))) (length arr);
     };
