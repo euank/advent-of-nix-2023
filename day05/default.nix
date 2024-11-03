@@ -28,7 +28,6 @@ let
       mappings = map parseMapping mappings;
     };
 
-  applySingleMapping = num: m: if m == null then num else num - m.start + m.to;
   doMapping = num: mapping:
     # See if this is in the mapping
     let
@@ -39,7 +38,7 @@ let
           1
         else
           0);
-    in applySingleMapping m;
+    in if m == null then num else num - m.start + m.to;
 
   part1Answer = input:
     let
@@ -54,6 +53,7 @@ let
 
   # part2
   # Map one range into possibly multiple ranges using the given mapping.
+  applySingleMapping = num: m: if m == null then num else num - m.start + m.to;
   doRangeMappings = range: mapping:
     let
       start = head range;
