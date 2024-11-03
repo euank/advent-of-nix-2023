@@ -64,6 +64,6 @@ in {
   all = pkgs.writeShellScriptBin "check.sh"
     (pkgs.lib.strings.concatStringsSep "\n" ([ "set -x" ]
       ++ (pkgs.lib.attrsets.mapAttrsToList (day: _:
-        "nix eval '.#check.${day}' &>/dev/null && echo '${day} pass' || echo '${day} failed'")
+        "nix eval '.#check.${day}' &>/dev/null && echo -e '\\033[0;32m${day} pass\\033[0m' || echo -e '\\033[0;31m${day} failed\\033[0m'")
         answers)));
 } // (pkgs.lib.mapAttrs (day: _: checkDay day) answers)
