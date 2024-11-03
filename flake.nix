@@ -7,7 +7,7 @@
         nixpkgs.lib.filterAttrs (name: _: nixpkgs.lib.hasPrefix "day" name)
         (builtins.readDir ./.);
     in {
-      inherit lib;
+      inherit lib nixpkgs;
       formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.nixfmt;
 
       check = import ./check.nix { inherit nixpkgs lib; };

@@ -18,3 +18,19 @@ nix has awful computational performance. Really bad. Expect solutions to general
 I will note any days below which take over 8GiB of memory and/or over 5 minutes on my machine.
 
 ### Specific day's notes
+
+#### day08
+
+This day does not evaluate with Lix at the time of writing
+
+```
+$ nix --version
+nix (Lix, like Nix) 2.91.1
+$ nix eval --option max-call-depth 4294967295 '.#day08'
+error: stack overflow (possible infinite recursion)
+
+$ nix --version
+nix (Nix) 2.18.1
+$ nix eval --option max-call-depth 4294967295 '.#day08'
+{ part1 = 11911; part2 = 10151663816849; }
+```
