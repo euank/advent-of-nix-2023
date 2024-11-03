@@ -43,25 +43,26 @@ let
     lcm = lhs: rhs: (lhs * rhs) / (gcd lhs rhs);
     abs = num: if num < 0 then (-1) * num else num;
 
-
     arr2 = rec {
       width = arr: if (length arr) == 0 then 0 else length (elemAt arr 0);
       height = length;
 
       get = arr: x: y: elemAt (elemAt arr y) x;
       set = arr: x: y: val:
-      let
-        toY = sublist 0 y arr;
-        elY = elemAt arr y;
-        afterY = sublist (y + 1) ((length arr) - (y + 1)) arr;
-        toX = sublist 0 x elY;
-        afterX = sublist (x  + 1) ((length elY) - (x + 1)) elY;
-      in toY ++ [ (toX ++ [ val ] ++ afterX) ] ++ afterY;
+        let
+          toY = sublist 0 y arr;
+          elY = elemAt arr y;
+          afterY = sublist (y + 1) ((length arr) - (y + 1)) arr;
+          toX = sublist 0 x elY;
+          afterX = sublist (x + 1) ((length elY) - (x + 1)) elY;
+        in toY ++ [ (toX ++ [ val ] ++ afterX) ] ++ afterY;
 
       getRow = arr: i: elemAt arr i;
       getCol = arr: i: genList (y: get arr i y) (height arr);
 
-      map = f: arr: genList (y: genList (x: f (get arr x y)) (length (head arr))) (length arr);
+      map = f: arr:
+        genList (y: genList (x: f (get arr x y)) (length (head arr)))
+        (length arr);
     };
   };
 in lib
