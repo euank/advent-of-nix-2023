@@ -10,58 +10,76 @@ let
         let
           parts = splitString " " line;
           nums = map toInt (splitString "," (elemAt parts 1));
-        in {
-          inherit nums;
           data = stringToCharacters (head parts);
-        };
+        in { inherit nums data; };
       lines = splitString "\n" input;
     in map parseLine lines;
 
-  rowArrangements = rem: nums: lastWasSpring:
+  arrangements = memo: springs: nums:
     let
-      num = head nums;
-      el = head rem;
-      # if we have nothing left, there's no additional arrangements
-    in if (length rem) == 0 then
-      0
-      # If there's one item left, we can check if we're in a possible configuration, i.e. the number list should be length 1 and have either 0 or 1 spring, and the el should match
-    else if (length rem) == 1 then
-      if (length nums) == 1 then
-      # no broken springs left
-        if num == 0 && (el == "?" || el == ".") then
-          1
-          # 1 broken spring left
-        else if num == 1 && (el == "?" || el == "#") then
-          1
-          # impossible configuration
-        else
-          0
-      else
-        0
-        # otherwise we have more than 1 item left, so search all branches
-        # First case: we are on an unbroken spring, in that case, we need to check if
-        # we're in a possible configuration and maybe recurse
-    else if el == "." then
-    # impossible arrangement
-      if lastWasSpring && num > 0 then
-        0
-      else if lastWasSpring && num == 0 && (length nums) > 1 then
-        rowArrangements (tail rem) (tail nums) false
-      else
-        rowArrangements (tail rem) nums false
-    else if el == "#" then
-    # We have a broken spring but needed none
-      if num == 0 then
-        0
-      else
-        rowArrangements (tail rem) ([ (num - 1) ] ++ (tail nums)) true
-        # el is '?', we need to branch both paths
+      key = "${builtins.toJSON springs}-${builtins.toJSON nums}";
+      # If we've already dealt with all springs, we're done and either found a working or broken arrangement
+    in if (length nums) == 0 then {
+      inherit memo;
+      val = if (lists.any (s: s == "#") springs) then 0 else 1;
+    } else if memo ? "${key}" then {
+      inherit memo;
+      val = memo."${key}";
+    } else if let
+      minNeededRemainingItems = (length nums) + (foldl' builtins.add 0 nums)
+        - 1;
+    in (length springs) < minNeededRemainingItems then {
+      inherit memo;
+      val = 0;
+    } else if (head springs) == "." then
+      arrangements memo (tail springs) nums
     else
-      (rowArrangements ([ "." ] ++ (tail rem)) nums lastWasSpring)
-      + (rowArrangements ([ "#" ] ++ (tail rem)) nums lastWasSpring);
+    # Find an arrangement for the current group
+      let
+        num = head nums;
+        els = take num springs;
+        is_last = (length springs) == num;
+        next = elemAt springs num;
+        ret = if (all (s: s != ".") els) && (is_last || next != "#") then
+          arrangements memo (drop (num + 1) springs) (tail nums)
+        else {
+          inherit memo;
+          val = 0;
+        };
+        # Recurse into the 'wasn't a spring' case for ?
+        ret' = if (head springs) == "?" then
+          arrangements ret.memo (tail springs) nums
+        else {
+          memo = ret.memo;
+          val = 0;
+        };
+      in rec {
+        val = ret.val + ret'.val;
+        memo = ret'.memo // { "${key}" = val; };
+      };
 
   part1Answer = lines:
-    let vals = map (line: rowArrangements line.data line.nums false) lines;
-    in foldl' builtins.add 0 vals;
+    let
+      ret = foldl' (acc: line:
+        let el = arrangements acc.memo line.data line.nums;
+        in {
+          memo = el.memo;
+          val = acc.val + el.val;
+        }) {
+          val = 0;
+          memo = { };
+        } lines;
+    in ret.val;
 
-in { part1 = part1Answer (parseInput input); }
+  unfoldSprings = map (l: {
+    nums = flatten (replicate 5 l.nums);
+    data = stringToCharacters (concatStrings
+      (flatten (intersperse "?" (replicate 5 (concatStrings l.data)))));
+  });
+
+  part2Answer = lines: part1Answer (unfoldSprings lines);
+
+in {
+  part1 = part1Answer (parseInput input);
+  part2 = part2Answer (parseInput input);
+}
