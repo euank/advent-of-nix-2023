@@ -63,6 +63,13 @@ let
       map = f: arr:
         genList (y: genList (x: f (get arr x y)) (length (head arr)))
         (length arr);
+
+      rotate = arr:
+      let
+        w = width arr;
+        h = height arr;
+      in
+        genList (x: genList (y: get arr x (h - y - 1)) h) w;
     };
   };
 in lib
