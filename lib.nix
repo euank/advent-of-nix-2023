@@ -70,6 +70,8 @@ let
         h = height arr;
       in
         genList (x: genList (y: get arr x (h - y - 1)) h) w;
+
+      rotate' = arr: rotate (rotate (rotate arr));
     };
   };
 in lib
