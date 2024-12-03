@@ -34,3 +34,11 @@ nix (Nix) 2.18.1
 $ nix eval --option max-call-depth 4294967295 '.#day08'
 { part1 = 11911; part2 = 10151663816849; }
 ```
+
+### day16
+
+You may need a larger call depth:
+
+```
+$ nix eval --option max-call-depth 4294967295 '.#day16'
+```
