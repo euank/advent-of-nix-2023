@@ -130,7 +130,32 @@ let
     (acc: el: acc + (if el.left || el.right || el.up || el.down then 1 else 0))
     0 (flatten finalGrid);
 
+  # brute forceable? Probably, let's find out
+  part2Answer = input:
+    let
+      p = parseInput input;
+      init = arr2.map (el: {
+        val = el;
+        up = false;
+        down = false;
+        left = false;
+        right = false;
+      }) p;
+
+      scoreGrid = grid:
+        foldl' (acc: el:
+          acc + (if el.left || el.right || el.up || el.down then 1 else 0)) 0
+        (flatten grid);
+
+      grids = (concatMap
+        (x: [ (step init x 0 "down") (step init x ((arr2.height p) - 1) "up") ])
+        (builtins.genList trivial.id (arr2.width p))) ++ ((concatMap (y: [
+          (step init 0 y "right")
+          (step init ((arr2.width p) - 1) y "left")
+        ]) (builtins.genList trivial.id (arr2.height p))));
+    in foldl' trivial.max 0 (map scoreGrid grids);
+
 in {
   part1 = part1Answer input;
-  # part2 = part2Answer input;
+  part2 = part2Answer input;
 }

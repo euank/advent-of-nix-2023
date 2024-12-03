@@ -5,12 +5,16 @@ let
     # x^n
     pow = x: n: if n == 1 then x else x * (pow x (n - 1));
 
-    setlist = n: val: arr: (sublist 0 n arr) ++ [ val ] ++ (sublist (n + 1) (length arr) arr);
+    setlist = n: val: arr:
+      (sublist 0 n arr) ++ [ val ] ++ (sublist (n + 1) (length arr) arr);
 
     removeLast = cmp: el: arr:
-    if (length arr) == 0 then []
-    else if (cmp (last arr) el) == 0 then init arr
-    else (removeLast cmp el (init arr)) ++ [ (last arr) ];
+      if (length arr) == 0 then
+        [ ]
+      else if (cmp (last arr) el) == 0 then
+        init arr
+      else
+        (removeLast cmp el (init arr)) ++ [ (last arr) ];
 
     splitStringWhitespace = s:
       pkgs.lib.flatten
@@ -76,11 +80,10 @@ let
         (length arr);
 
       rotate = arr:
-      let
-        w = width arr;
-        h = height arr;
-      in
-        genList (x: genList (y: get arr x (h - y - 1)) h) w;
+        let
+          w = width arr;
+          h = height arr;
+        in genList (x: genList (y: get arr x (h - y - 1)) h) w;
 
       rotate' = arr: rotate (rotate (rotate arr));
     };
